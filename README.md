@@ -2,6 +2,19 @@
 
 Backend-сервис для лендинг-презентации разработчика: REST API формы обратной связи, email-уведомления, rate limiting, логирование и AI-анализ обращений.
 
+## Демо
+
+| Что | Ссылка |
+|---|---|
+| Лендинг с формой | https://nontolerantly-unmendable-frederic.ngrok-free.dev |
+| Swagger UI | https://nontolerantly-unmendable-frederic.ngrok-free.dev/api/documentation |
+| Health check | https://nontolerantly-unmendable-frederic.ngrok-free.dev/api/health |
+| Metrics | https://nontolerantly-unmendable-frederic.ngrok-free.dev/api/metrics |
+| Репозиторий | https://github.com/assetiik/testing-laravel |
+
+Демо поднято через ngrok-туннель к локальному серверу, поэтому ссылка активна пока запущен туннель.
+Для постоянного размещения в репозитории есть `Dockerfile` и `render.yaml` — см. раздел «Деплой».
+
 ## 1. Как запустить проект
 
 ### Требования
@@ -294,23 +307,23 @@ Postman-коллекция: `docs/postman/Dev_Landing_Contact_API.postman_collec
 
 ## 8. Деплой
 
-### Вариант A: Render / Railway
+### Вариант A: Render (Docker)
 
-1. Создайте Web Service из GitHub-репозитория
-2. Build command:
+У Render нет нативного PHP-окружения, поэтому сервис собирается из `Dockerfile`.
+Блюпринт лежит в `render.yaml`.
+
+1. Render → **New** → **Blueprint** → выбрать этот репозиторий
+2. Render прочитает `render.yaml` и создаст web-сервис с `runtime: docker`
+3. Заполнить секреты, помеченные в блюпринте как `sync: false`:
+   `AI_API_KEY`, `CONTACT_OWNER_EMAIL` и группу `MAIL_*`
+4. Health check настроен на `/api/health`
+
+Локально образ можно проверить так:
 
 ```bash
-composer install --no-dev --optimize-autoloader && php artisan key:generate --force && php artisan l5-swagger:generate
+docker build -t dev-landing-api .
+docker run --rm -p 8000:8000 --env-file .env dev-landing-api
 ```
-
-3. Start command:
-
-```bash
-php artisan serve --host=0.0.0.0 --port=$PORT
-```
-
-4. Добавьте env-переменные из `.env.example`
-5. Убедитесь, что `storage/` доступен на запись
 
 ### Вариант B: ngrok (локально)
 
@@ -319,7 +332,8 @@ php artisan serve
 ngrok http 8000
 ```
 
-Передайте публичный URL проверяющему.
+ngrok выдаст публичный HTTPS-адрес — его и передаём проверяющему.
+Туннель живёт, пока запущены `php artisan serve` и `ngrok`.
 
 ### Если деплой невозможен
 
