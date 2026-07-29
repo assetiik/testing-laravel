@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
         libzip-dev \
         libicu-dev \
+        libsqlite3-dev \
+        pkg-config \
     && docker-php-ext-install -j"$(nproc)" bcmath pdo_sqlite zip intl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,15 +31,18 @@ RUN composer dump-autoload --optimize --no-dev \
         storage/logs \
         database \
     && touch database/database.sqlite \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod +x artisan docker-entrypoint.sh
 
 ENV APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stack \
-    LOG_STACK=single,api
+    LOG_STACK=single,api \
+    SESSION_DRIVER=file \
+    CACHE_STORE=file \
+    QUEUE_CONNECTION=sync \
+    DB_CONNECTION=sqlite
 
 EXPOSE 8000
 
-CMD php artisan l5-swagger:generate \
-    && php artisan migrate --force --graceful \
-    && php artisan serve --host=0.0.0.0 --port="${PORT:-8000}"
+ENTRYPOINT ["./docker-entrypoint.sh"]
