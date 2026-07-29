@@ -19,7 +19,7 @@ Backend-сервис для лендинг-презентации разрабо
 
 ### Требования
 
-- PHP 8.3+ (рекомендуется 8.4)
+- PHP 8.4.1+
 - Composer 2.x
 - Расширения PHP: `openssl`, `pdo`, `mbstring`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`
 

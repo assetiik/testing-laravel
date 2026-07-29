@@ -41,7 +41,8 @@ ENV APP_ENV=production \
     SESSION_DRIVER=file \
     CACHE_STORE=file \
     QUEUE_CONNECTION=sync \
-    DB_CONNECTION=sqlite
+    DB_CONNECTION=sqlite \
+    PHP_CLI_SERVER_WORKERS=4
 
 EXPOSE 8000
 

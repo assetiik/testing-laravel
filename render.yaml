@@ -30,6 +30,8 @@ services:
         value: sync
       - key: DB_CONNECTION
         value: sqlite
+      - key: PHP_CLI_SERVER_WORKERS
+        value: 4
       - key: AI_ENABLED
         value: true
       - key: AI_PROVIDER
@@ -53,6 +55,8 @@ services:
         sync: false
       - key: MAIL_PORT
         sync: false
+      - key: MAIL_TIMEOUT
+        value: 10
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
