@@ -52,7 +52,8 @@ php artisan l5-swagger:generate
 | `AI_API_KEY` | Ключ провайдера |
 | `AI_BASE_URL` | Базовый URL OpenAI-совместимого API |
 | `AI_MODEL` | Модель |
-| `MAIL_MAILER` | `log` для локальной разработки, `smtp` для продакшена |
+| `MAIL_MAILER` | `log` для локальной разработки, `smtp` или `resend` для продакшена |
+| `RESEND_API_KEY` | Ключ Resend, нужен только при `MAIL_MAILER=resend` |
 | `CORS_ALLOWED_ORIGINS` | `*` или список origin через запятую |
 
 Если `AI_API_KEY` пустой или AI недоступен — сервис **продолжает работать** через `FallbackAiService`.
@@ -71,6 +72,14 @@ php artisan l5-swagger:generate
 
 ```bash
 php artisan ai:test "Здравствуйте! Хотим предложить вам работу."
+```
+
+### Проверка почты
+
+Отправить тестовое письмо через текущий mailer (по умолчанию — на `CONTACT_OWNER_EMAIL`):
+
+```bash
+php artisan mail:test you@example.com
 ```
 
 ### Запуск локально
@@ -315,8 +324,32 @@ Postman-коллекция: `docs/postman/Dev_Landing_Contact_API.postman_collec
 1. Render → **New** → **Blueprint** → выбрать этот репозиторий
 2. Render прочитает `render.yaml` и создаст web-сервис с `runtime: docker`
 3. Заполнить секреты, помеченные в блюпринте как `sync: false`:
-   `AI_API_KEY`, `CONTACT_OWNER_EMAIL` и группу `MAIL_*`
+   `AI_API_KEY`, `CONTACT_OWNER_EMAIL`, `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`
 4. Health check настроен на `/api/health`
+
+#### Почта в продакшене: Resend вместо SMTP
+
+Render (как и большинство PaaS на free-тарифе) блокирует исходящие SMTP-соединения,
+поэтому Gmail SMTP на проде уходит в таймаут. Продакшен использует HTTP API Resend —
+код при этом не меняется, транспорт `resend` встроен в Laravel:
+
+```env
+MAIL_MAILER=resend
+RESEND_API_KEY=re_...
+MAIL_FROM_ADDRESS="noreply@ваш-домен.ru"
+```
+
+Важно про адрес отправителя: Resend разрешает слать письма только с **верифицированного домена**.
+Без своего домена доступен sandbox-адрес `onboarding@resend.dev`, но письма с него уходят
+только на email аккаунта Resend — копия пользователю на произвольный адрес будет отклонена.
+Заявка при этом всё равно сохраняется, а API возвращает `201` с `emails_delivered: false`.
+
+#### Эфемерное хранилище
+
+Файловая система инстанса на Render не персистентна: при каждом деплое
+`storage/app/private/*` обнуляется, поэтому `/api/metrics` после релиза стартует с нуля.
+Для продакшена сюда бы встали БД или Redis — репозитории изолируют хранилище за интерфейсом,
+так что замена не затрагивает сервисный слой.
 
 Локально образ можно проверить так:
 

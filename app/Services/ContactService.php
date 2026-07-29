@@ -10,6 +10,7 @@ use App\Repositories\ContactRepository;
 use App\Repositories\MetricsRepository;
 use App\Repositories\RateLimitRepository;
 use App\Services\Ai\AiServiceInterface;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -68,18 +69,30 @@ class ContactService
 
     private function sendEmails(ContactData $contact, string $suggestedReply): bool
     {
-        try {
-            Mail::to(config('contact.owner_email'))
-                ->send(new ContactOwnerMail($contact, $suggestedReply));
+        // Each letter is sent independently so a failing recipient
+        // (unverified sender domain, provider limits) cannot swallow the other one.
+        $ownerSent = $this->send(
+            'owner',
+            config('contact.owner_email'),
+            new ContactOwnerMail($contact, $suggestedReply),
+        );
 
-            Mail::to($contact->email)
-                ->send(new ContactUserMail($contact, $suggestedReply));
+        $userSent = $this->send('user', $contact->email, new ContactUserMail($contact, $suggestedReply));
+
+        return $ownerSent && $userSent;
+    }
+
+    private function send(string $recipientType, string $address, Mailable $mailable): bool
+    {
+        try {
+            Mail::to($address)->send($mailable);
 
             return true;
         } catch (Throwable $exception) {
-            Log::channel('api')->error('Failed to send contact emails', [
+            Log::channel('api')->error('Failed to send contact email', [
+                'recipient_type' => $recipientType,
+                'email' => $address,
                 'error' => $exception->getMessage(),
-                'email' => $contact->email,
             ]);
 
             return false;

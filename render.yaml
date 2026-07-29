@@ -47,7 +47,10 @@ services:
         sync: false
       - key: CONTACT_OWNER_EMAIL
         sync: false
+      # Render blocks outbound SMTP, so production uses the Resend HTTP API.
       - key: MAIL_MAILER
+        value: resend
+      - key: RESEND_API_KEY
         sync: false
       - key: MAIL_SCHEME
         sync: false
