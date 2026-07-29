@@ -6,14 +6,14 @@ Backend-сервис для лендинг-презентации разрабо
 
 | Что | Ссылка |
 |---|---|
-| Лендинг с формой | https://nontolerantly-unmendable-frederic.ngrok-free.dev |
-| Swagger UI | https://nontolerantly-unmendable-frederic.ngrok-free.dev/api/documentation |
-| Health check | https://nontolerantly-unmendable-frederic.ngrok-free.dev/api/health |
-| Metrics | https://nontolerantly-unmendable-frederic.ngrok-free.dev/api/metrics |
+| Лендинг с формой | https://dev-landing-api.onrender.com |
+| Swagger UI | https://dev-landing-api.onrender.com/api/documentation |
+| Health check | https://dev-landing-api.onrender.com/api/health |
+| Metrics | https://dev-landing-api.onrender.com/api/metrics |
 | Репозиторий | https://github.com/assetiik/testing-laravel |
 
-Демо поднято через ngrok-туннель к локальному серверу, поэтому ссылка активна пока запущен туннель.
-Для постоянного размещения в репозитории есть `Dockerfile` и `render.yaml` — см. раздел «Деплой».
+Демо постоянно размещено на Render через Docker. На бесплатном тарифе первый запрос после
+периода бездействия может занять до минуты, пока сервис выходит из sleep-режима.
 
 ## 1. Как запустить проект
 
